@@ -3,16 +3,15 @@ import numpy as np
 from scipy.optimize import linprog
 
 
-# For .xls files
-df = pd.read_excel("Table_Ciqual_2020_FR_2020.xls", engine='xlrd')
+
+df = pd.read_csv("food_db_cleaned.csv")
+
 print(df.count())
-L = df['alim_nom_fr'].unique().tolist()
-
-missing_count = df['alim_nom_fr'].isna().sum()
-print(f"Missing alim_nom_fr entries: {missing_count}")
+L = df['Ingredient'].unique().tolist()
 
 
-counts = df['alim_nom_fr'].value_counts()
+
+counts = df['Ingredient'].value_counts()
 repeated = counts[counts > 1]
 
 print(f"Number of repeated entries: {repeated}")
@@ -33,14 +32,6 @@ print(df.info())
 
 # Choose only the relevant nutrients
 nutrients = df.iloc[1:, 13:19]  # Example: 6 nutrients (AN1_1 to AN1_6)
-
-
-nutrients = nutrients.replace('-', np.nan)
-
-print("nutrients=",nutrients)
-print(nutrients.iloc[0, :])
-
-nutrients = nutrients.replace({'<': '', '>': '', ',': '.'}, regex=True).astype(float)
 
 nutrients = nutrients.T  # Rows: nutrients, Columns: food items
 
