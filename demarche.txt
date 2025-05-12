@@ -1,0 +1,99 @@
+here is the list of all nutritions (67 nutritions):
+ 1   Energie, Règlement UE N° 1169/2011 (kJ/100 g)          3169 non-null   object
+ 2   Energie, Règlement UE N° 1169/2011 (kcal/100 g)        3169 non-null   object
+ 3   Energie, N x facteur Jones, avec fibres  (kJ/100 g)    3169 non-null   object
+ 4   Energie, N x facteur Jones, avec fibres  (kcal/100 g)  3169 non-null   object
+ 5   Eau (g/100 g)                                          3183 non-null   object
+ 6   Protéines, N x facteur de Jones (g/100 g)              3185 non-null   object
+ 7   Protéines, N x 6.25 (g/100 g)                          3185 non-null   object
+ 8   Glucides (g/100 g)                                     3185 non-null   object
+ 9   Lipides (g/100 g)                                      3185 non-null   object
+ 10  Sucres (g/100 g)                                       3177 non-null   object
+ 11  Fructose (g/100 g)                                     3147 non-null   object
+ 12  Galactose (g/100 g)                                    3102 non-null   object
+ 13  Glucose (g/100 g)                                      3148 non-null   object
+ 14  Lactose (g/100 g)                                      3141 non-null   object
+ 15  Maltose (g/100 g)                                      3145 non-null   object
+ 16  Saccharose (g/100 g)                                   3148 non-null   object
+ 17  Amidon (g/100 g)                                       3150 non-null   object
+ 18  Fibres alimentaires (g/100 g)                          3185 non-null   object
+ 19  Polyols totaux (g/100 g)                               3174 non-null   object
+ 20  Cendres (g/100 g)                                      3180 non-null   object
+ 21  Alcool (g/100 g)                                       3185 non-null   object
+ 22  Acides organiques (g/100 g)                            3180 non-null   object
+ 23  AG saturés (g/100 g)                                   3181 non-null   object
+ 24  AG monoinsaturés (g/100 g)                             3177 non-null   object
+ 25  AG polyinsaturés (g/100 g)                             3175 non-null   object
+ 26  AG 4:0, butyrique (g/100 g)                            3153 non-null   object
+ 27  AG 6:0, caproïque (g/100 g)                            3151 non-null   object
+ 28  AG 8:0, caprylique (g/100 g)                           3152 non-null   object
+ 29  AG 10:0, caprique (g/100 g)                            3153 non-null   object
+ 30  AG 12:0, laurique (g/100 g)                            3162 non-null   object
+ 31  AG 14:0, myristique (g/100 g)                          3164 non-null   object
+ 32  AG 16:0, palmitique (g/100 g)                          3164 non-null   object
+ 33  AG 18:0, stéarique (g/100 g)                           3164 non-null   object
+ 34  AG 18:1 9c (n-9), oléique (g/100 g)                    3147 non-null   object
+ 35  AG 18:2 9c,12c (n-6), linoléique (g/100 g)             3147 non-null   object
+ 36  AG 18:3 c9,c12,c15 (n-3), alpha-linolénique (g/100 g)  3150 non-null   object
+ 37  AG 20:4 5c,8c,11c,14c (n-6), arachidonique (g/100 g)   3135 non-null   object
+ 38  AG 20:5 5c,8c,11c,14c,17c (n-3) EPA (g/100 g)          3151 non-null   object
+ 39  AG 22:6 4c,7c,10c,13c,16c,19c (n-3) DHA (g/100 g)      3158 non-null   object
+ 40  Cholestérol (mg/100 g)                                 3165 non-null   object
+ 41  Sel chlorure de sodium (g/100 g)                       3180 non-null   object
+ 42  Calcium (mg/100 g)                                     3176 non-null   object
+ 43  Chlorure (mg/100 g)                                    3134 non-null   object
+ 44  Cuivre (mg/100 g)                                      3168 non-null   object
+ 45  Fer (mg/100 g)                                         3178 non-null   object
+ 46  Iode (µg/100 g)                                        3165 non-null   object
+ 47  Magnésium (mg/100 g)                                   3174 non-null   object
+ 48  Manganèse (mg/100 g)                                   3167 non-null   object
+ 49  Phosphore (mg/100 g)                                   3172 non-null   object
+ 50  Potassium (mg/100 g)                                   3173 non-null   object
+ 51  Sélénium (µg/100 g)                                    3165 non-null   object
+ 52  Sodium (mg/100 g)                                      3180 non-null   object
+ 53  Zinc (mg/100 g)                                        3175 non-null   object
+ 54  Rétinol (µg/100 g)                                     3156 non-null   object
+ 55  Beta-Carotène (µg/100 g)                               3158 non-null   object
+ 56  Vitamine D (µg/100 g)                                  3155 non-null   object
+ 57  Vitamine E (mg/100 g)                                  3168 non-null   object
+ 58  Vitamine K1 (µg/100 g)                                 3123 non-null   object
+ 59  Vitamine K2 (µg/100 g)                                 3071 non-null   object
+ 60  Vitamine C (mg/100 g)                                  3165 non-null   object
+ 61  Vitamine B1 ou Thiamine (mg/100 g)                     3172 non-null   object
+ 62  Vitamine B2 ou Riboflavine (mg/100 g)                  3170 non-null   object
+ 63  Vitamine B3 ou PP ou Niacine (mg/100 g)                3172 non-null   object
+ 64  Vitamine B5 ou Acide pantothénique (mg/100 g)          3165 non-null   object
+ 65  Vitamine B6 (mg/100 g)                                 3172 non-null   object
+ 66  Vitamine B9 ou Folates totaux (µg/100 g)               3166 non-null   object
+ 67  Vitamine B12 (µg/100 g)
+
+We want to find all the possibilities :
+m1 * AN1_1 + m2 * AN2_1 +  ... + mm * ANm_1 < 50
+m1 * AN1_2 + m2 * AN2_2 +  ... + mm * ANm_2 < 20
+m1 * AN1_3 + m2 * AN2_3 +  ... + mm * ANm_3 < 10
+m1 * AN1_4 + m2 * AN2_4 +  ... + mm * ANm_4 > 50
+.
+.
+.
+
+1st step : 
+    devide the problem into 2 parts :
+        -apply the Simplex algorithm on :
+        m1 * AN1_1 + m2 * AN2_1 +  ... + mm * ANm_1 < 50
+        m2 * AN1_2 + m2 * AN2_2 +  ... + mm * ANm_2 < 20
+        m1 * AN1_3 + m2 * AN2_3 +  ... + mm * ANm_3 < 10
+        while maximizing m1 + m2 + ... + mm
+
+        -apply the Simplex algorithm on :
+        m1 * AN1_4 + m2 * AN2_4 +  ... + mm * ANm_4 > 15
+        m2 * AN1_5 + m2 * AN2_5 +  ... + mm * ANm_5 > 60
+        m1 * AN1_6 + m2 * AN2_6 +  ... + mm * ANm_6 > 5
+        while mminimizing m1 + m2 + ... + mm
+
+    now we have m1 E [minM1,maxM1]
+                m2 E [minM2,maxM2]
+                m3 E [minM3,maxM3]
+                ...
+    we elminite values where minMi>maxMi.
+
+i want to apply the Simplex algorithm on the elements that i already have AN1_2 is the second nutrition of the first elements? 
