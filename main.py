@@ -3,7 +3,7 @@ import numpy as np
 from scipy.optimize import linprog
 
 # Load the food dataset
-df = pd.read_csv("/mnt/data/food_db_cleaned.csv")
+df = pd.read_csv("food_db_cleaned.csv")
 
 # Dynamically fetch nutrient columns (we will assume all columns related to nutrients are numeric)
 nutrient_columns = df.select_dtypes(include=[np.number]).columns.tolist()
