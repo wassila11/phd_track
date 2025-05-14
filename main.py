@@ -3,7 +3,7 @@ import numpy as np
 from scipy.optimize import linprog
 
 # Load the food dataset
-df = pd.read_csv("food_db_cleaned.csv")
+df = pd.read_csv("/mnt/data/food_db_cleaned.csv")
 
 # Dynamically fetch nutrient columns (we will assume all columns related to nutrients are numeric)
 nutrient_columns = df.select_dtypes(include=[np.number]).columns.tolist()
@@ -18,6 +18,9 @@ print("Nutrient columns detected:", nutrient_columns)
 # Convert nutrient columns to numeric (in case there are non-numeric values like strings)
 nutrients = df[nutrient_columns]
 nutrients = nutrients.apply(pd.to_numeric, errors='coerce')  # Convert to numeric
+
+# Drop rows with NaN values in the nutrient data
+nutrients = nutrients.dropna()
 
 # Collect user input for the target nutrient conditions
 print("Please enter the nutritional goals you want to satisfy:")
