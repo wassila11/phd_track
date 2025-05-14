@@ -2,93 +2,65 @@ import pandas as pd
 import numpy as np
 from scipy.optimize import linprog
 
-
-
+# Load the food dataset
 df = pd.read_csv("food_db_cleaned.csv")
 
-print(df.count())
-L = df['Ingredient'].unique().tolist()
+# Dynamically fetch nutrient columns (we will assume all columns related to nutrients are numeric)
+nutrient_columns = df.select_dtypes(include=[np.number]).columns.tolist()
 
+# Remove columns that are not nutrients (e.g., 'Ingredient', 'Main category', etc.)
+non_nutrient_columns = ['Ingredient', 'Main category', 'Subcategory', 'Detailed category']
+nutrient_columns = [col for col in nutrient_columns if col not in non_nutrient_columns]
 
+# Show nutrient columns to confirm
+print("Nutrient columns detected:", nutrient_columns)
 
-counts = df['Ingredient'].value_counts()
-repeated = counts[counts > 1]
+# Convert nutrient columns to numeric (in case there are non-numeric values like strings)
+nutrients = df[nutrient_columns]
+nutrients = nutrients.apply(pd.to_numeric, errors='coerce')  # Convert to numeric
 
-print(f"Number of repeated entries: {repeated}")
+# Collect user input for the target nutrient conditions
+print("Please enter the nutritional goals you want to satisfy:")
 
-#no null or repeted values of alim_nom_fr
-print(len(list(df.columns)))
-print(list(df.columns))
-M = [0]*67
-print(df.info())
+# Collecting user inputs for each nutrient they care about
+constraints = {}
+for column in nutrient_columns:
+    nutrient_goal = input(f"Enter the minimum target for {column} (or press Enter to skip): ")
+    if nutrient_goal:
+        constraints[column] = float(nutrient_goal)
 
+# Step 1: Prepare the matrix of nutrient coefficients for the constraints
+A_ub = []
+b_ub = []
 
+# Populate the matrix for constraints
+for column, goal in constraints.items():
+    A_ub.append(nutrients[column].values)  # Coefficients for each nutrient
+    b_ub.append(goal)  # Target minimum for the nutrient
 
-# each row is a food item, and each column is a nutrient
+# Convert A_ub and b_ub to NumPy arrays
+A_ub = np.array(A_ub)
+b_ub = np.array(b_ub)
 
-# Let's say you have n food items and you're interested in first 6 nutrients
-# and AN1_1 is the 1st nutrient, AN1_2 the 2nd, etc.
+# Step 2: Objective Function: Maximize the sum of ingredient weights (i.e., m1 + m2 + ... + mm)
+# This is simply to maximize the total amount of ingredients used
+c = -np.ones(len(df))  # Maximizing the sum of m (minimize -sum(m))
 
+# Step 3: Solve using Linear Programming (Simplex or HiGHS)
+result = linprog(c=c, A_ub=A_ub, b_ub=b_ub, bounds=[(0, None)] * len(df), method='highs')
 
-# Choose only the relevant nutrients
-nutrients = df.iloc[1:, 13:19]  # Example: 6 nutrients (AN1_1 to AN1_6)
-
-nutrients = nutrients.T  # Rows: nutrients, Columns: food items
-
-# ========================
-# PART 1: Maximize m1 + m2 + ... + mm
-# under:
-#     sum(mi * ANi_1) < 50
-#     sum(mi * ANi_2) < 20
-#     sum(mi * ANi_3) < 10
-# ========================
-
-A_ub = nutrients.iloc[0:3].values  # 3 constraints with '<'
-b_ub = [50, 20, 10]
-
-c = -np.ones(nutrients.shape[1])  # Maximize sum(m) <=> minimize -sum(m)
-
-# Solve first LP
-res1 = linprog(c=c, A_ub=A_ub, b_ub=b_ub, bounds=(0, None), method='highs')
-
-print("=== Maximize ===")
-print("Status:", res1.message)
-print("m (weights):", res1.x)
-print("Objective (max m sum):", -res1.fun)
-
-# Save max bounds
-max_m = res1.x
-
-# ========================
-# PART 2: Minimize m1 + m2 + ... + mm
-# under:
-#     sum(mi * ANi_4) > 15
-#     sum(mi * ANi_5) > 60
-#     sum(mi * ANi_6) > 5
-# ========================
-
-A_ub = -nutrients.iloc[3:6].values  # negate to convert to <=
-b_ub = [-15, -60, -5]
-
-c = np.ones(nutrients.shape[1])  # Minimize sum(m)
-
-# Solve second LP
-res2 = linprog(c=c, A_ub=A_ub, b_ub=b_ub, bounds=(0, None), method='highs')
-
-print("=== Minimize ===")
-print("Status:", res2.message)
-print("m (weights):", res2.x)
-print("Objective (min m sum):", res2.fun)
-
-# Save min bounds
-min_m = res2.x
-
-# ========================
-# Valid range filtering
-# ========================
-valid_indices = []
-for i, (mi_min, mi_max) in enumerate(zip(min_m, max_m)):
-    if mi_min <= mi_max:
-        valid_indices.append(i)
-
-print("Valid indices (food items):", valid_indices)
+# Step 4: Display results
+if result.success:
+    print("Optimal ingredient combination found!")
+    print("Ingredient weights (amount to use):", result.x)
+    
+    # Prepare the output DataFrame with ingredients and their amounts
+    result_df = df.copy()
+    result_df['amount_to_use (g)'] = result.x * 100  # Convert from per 100g to grams
+    for nutrient in constraints.keys():
+        result_df[f'total_{nutrient}_g'] = result_df['amount_to_use (g)'] * result_df[nutrient] / 100
+    
+    # Display the results in a table
+    print(result_df[['Ingredient', 'amount_to_use (g)'] + [f'total_{nutrient}_g' for nutrient in constraints.keys()]])
+else:
+    print("No valid combinations found.")
