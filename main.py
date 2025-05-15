@@ -1,20 +1,14 @@
 import pandas as pd
 import numpy as np
+import math
 from scipy.optimize import linprog
 
 
 
-df = pd.read_csv("food_db_cleaned.csv")
-
-print(df.count())
-L = df['Ingredient'].unique().tolist()
+df = pd.read_csv("phd_track/Table Ciqual 2020_ENG_2020 07 07.csv")
 
 
 
-counts = df['Ingredient'].value_counts()
-repeated = counts[counts > 1]
-
-print(f"Number of repeated entries: {repeated}")
 
 #no null or repeted values of alim_nom_fr
 print(len(list(df.columns)))
@@ -31,7 +25,7 @@ print(df.info())
 
 
 # Choose only the relevant nutrients
-nutrients = df.iloc[1:, 13:19]  # Example: 6 nutrients (AN1_1 to AN1_6)
+nutrients = df.iloc[0:10, 13:19]  # Example: 6 nutrients (AN1_1 to AN1_6)
 
 nutrients = nutrients.T  # Rows: nutrients, Columns: food items
 
@@ -43,10 +37,22 @@ nutrients = nutrients.T  # Rows: nutrients, Columns: food items
 #     sum(mi * ANi_3) < 10
 # ========================
 
-A_ub = nutrients.iloc[0:3].values  # 3 constraints with '<'
-b_ub = [50, 20, 10]
+A_ub = nutrients.values
+for i in range (len(A_ub)):
+    for j in range(len(A_ub[i])):  # 3 constraints with '<'
+        if A_ub[i][j] == '-':
+            A_ub[i][j] = 0
+        if type(A_ub[i][j]) != int and ',' in A_ub[i][j]:
+            x = A_ub[i][j].replace(',','.')
+            A_ub[i][j] = x
+        if type(A_ub[i][j]) != int and '<' in A_ub[i][j]:
+            x = A_ub[i][j].replace('<','')
+            A_ub[i][j] = x
+b_ub = [500.0, 500.0, 500.0 , 100000.0, 100000.0, 100000.0]
 
-c = -np.ones(nutrients.shape[1])  # Maximize sum(m) <=> minimize -sum(m)
+c= [11.01321586,6.53594771,6.51890482,5.8685446,6.57894737,8.29187396,6.59630607,6.89655172,6.88705234,5.36480687]
+for i in range(len(c)):
+    c[i] = -c[i]
 
 # Solve first LP
 res1 = linprog(c=c, A_ub=A_ub, b_ub=b_ub, bounds=(0, None), method='highs')
@@ -54,7 +60,7 @@ res1 = linprog(c=c, A_ub=A_ub, b_ub=b_ub, bounds=(0, None), method='highs')
 print("=== Maximize ===")
 print("Status:", res1.message)
 print("m (weights):", res1.x)
-print("Objective (max m sum):", -res1.fun)
+#print("Objective (max m sum):", -res1.fun)
 
 # Save max bounds
 max_m = res1.x
