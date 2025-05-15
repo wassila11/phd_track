@@ -1,71 +1,117 @@
 import pandas as pd
-import numpy as np
-from scipy.optimize import linprog
+from pulp import LpProblem, LpVariable, lpSum, LpMaximize, LpBinary, PULP_CBC_CMD
 
-# Create a tiny fake dataset with 3 ingredients and 3 nutrients
-data = {
-    'Ingredient': ['Apple', 'Banana', 'Carrot'],
-    'Protein (g/100g)': [0.3, 1.1, 0.9],
-    'Fat (g/100g)': [0.2, 0.3, 0.1],
-    'Sugar (g/100g)': [10, 12, 5]
-}
+# Load your full dataset
+df = pd.read_csv("food_db_cleaned.csv")
 
-df = pd.DataFrame(data)
 
-nutrient_columns = ['Protein (g/100g)', 'Fat (g/100g)', 'Sugar (g/100g)']
 
-print("Available nutrients:", nutrient_columns)
+# Identify nutrient columns dynamically
+nutrient_columns = df.select_dtypes(include=['number']).columns.tolist()
 
-# User input simulation: instead of input(), we hardcode constraints here for test
-upper_constraints = {
-    'Sugar (g/100g)': 15  # max 15g sugar total
-}
-lower_constraints = {
-    'Protein (g/100g)': 1.0,  # at least 1g protein total
-    'Fat (g/100g)': 0.3       # at least 0.3g fat total
-}
 
-# Prepare matrices for upper bound constraints: sum(m_i * nutrient_i) <= max_value
-A_ub = []
-b_ub = []
+# Remove non-nutrient columns if present (adjust these as needed)
+non_nutrient_cols = ['Ingredient', 'Main category', 'Subcategory', 'Detailed category']
+nutrient_columns = [col for col in nutrient_columns if col not in non_nutrient_cols]
+
+
+# Replace NaN or infinite values in nutrient columns with 0 (or any appropriate fill)
+df[nutrient_columns] = df[nutrient_columns].fillna(0)
+df[nutrient_columns] = df[nutrient_columns].replace([float('inf'), -float('inf')], 0)
+
+print("Available nutrients:")
+for col in nutrient_columns:
+    print(f" - {col}")
+
+# Get user input for constraints
+print("\nEnter upper bound constraints (nutrient name and max value). Type 'done' to finish.")
+upper_constraints = {}
+while True:
+    nut = input("Nutrient for upper bound (or 'done'): ").strip()
+    if nut.lower() == 'done':
+        break
+    if nut not in nutrient_columns:
+        print("Invalid nutrient name, try again.")
+        continue
+    val = input(f"Max allowed for {nut}: ").strip()
+    try:
+        val = float(val)
+    except:
+        print("Invalid number, try again.")
+        continue
+    upper_constraints[nut] = val
+
+print("\nEnter lower bound constraints (nutrient name and min value). Type 'done' to finish.")
+lower_constraints = {}
+while True:
+    nut = input("Nutrient for lower bound (or 'done'): ").strip()
+    if nut.lower() == 'done':
+        break
+    if nut not in nutrient_columns:
+        print("Invalid nutrient name, try again.")
+        continue
+    val = input(f"Min required for {nut}: ").strip()
+    try:
+        val = float(val)
+    except:
+        print("Invalid number, try again.")
+        continue
+    lower_constraints[nut] = val
+
+# Get max ingredients limit
+while True:
+    max_ing_str = input("\nEnter maximum number of ingredients to use (integer): ").strip()
+    try:
+        max_ingredients = int(max_ing_str)
+        if max_ingredients <= 0:
+            print("Must be positive integer.")
+            continue
+        break
+    except:
+        print("Invalid integer, try again.")
+
+print(f"\nSolving with max {max_ingredients} ingredients...")
+
+# Big M value (large number for linking usage and amount)
+M = 10000
+
+# Define MILP problem (maximize total amount of ingredients)
+prob = LpProblem("Ingredient_Selection", LpMaximize)
+
+# Variables
+amount_vars = {ing: LpVariable(f"amt_{ing}", lowBound=0) for ing in df['Ingredient']}
+use_vars = {ing: LpVariable(f"use_{ing}", cat=LpBinary) for ing in df['Ingredient']}
+
+# Objective: maximize total amount
+prob += lpSum(amount_vars.values())
+
+# Link amount and usage
+for ing in df['Ingredient']:
+    prob += amount_vars[ing] <= M * use_vars[ing]
+
+# Ingredient count limit
+prob += lpSum(use_vars.values()) <= max_ingredients
+
+# Nutrient constraints upper bounds
 for nut, val in upper_constraints.items():
-    A_ub.append(df[nut].values)
-    b_ub.append(val)
+    prob += lpSum(amount_vars[ing] * df.loc[df['Ingredient'] == ing, nut].values[0]/100
+                  for ing in df['Ingredient']) <= val
 
-# Prepare matrices for lower bound constraints: sum(m_i * nutrient_i) >= min_value
-A_ub_lower = []
-b_ub_lower = []
+# Nutrient constraints lower bounds
 for nut, val in lower_constraints.items():
-    A_ub_lower.append(-df[nut].values)
-    b_ub_lower.append(-val)
+    prob += lpSum(amount_vars[ing] * df.loc[df['Ingredient'] == ing, nut].values[0]/100
+                  for ing in df['Ingredient']) >= val
 
-# Combine upper and lower constraints
-if A_ub and A_ub_lower:
-    A_ub = np.vstack([A_ub, A_ub_lower])
-    b_ub = np.hstack([b_ub, b_ub_lower])
-elif A_ub_lower:
-    A_ub = np.array(A_ub_lower)
-    b_ub = np.array(b_ub_lower)
+# Solve MILP
+prob.solve(PULP_CBC_CMD(msg=1))  # Set msg=1 to see solver output, 0 to hide
+
+# Print solution
+if prob.status == 1:  # Optimal
+    print("\nOptimal ingredient amounts (grams):")
+    for ing in df['Ingredient']:
+        amt = amount_vars[ing].varValue
+        used = use_vars[ing].varValue
+        if used > 0.5:
+            print(f"{ing}: {amt:.2f} g")
 else:
-    A_ub = np.array(A_ub)
-    b_ub = np.array(b_ub)
-
-# Objective: maximize total amount => minimize negative sum
-c = -np.ones(len(df))
-
-result = linprog(c=c, A_ub=A_ub, b_ub=b_ub, bounds=[(0, None)]*len(df), method='highs')
-
-if result.success:
-    print("Optimal ingredient amounts (per 100g units):")
-    for ing, amt in zip(df['Ingredient'], result.x):
-        print(f"{ing}: {amt:.2f}")
-
-    print("\nTotal nutrients in the mix:")
-    total_protein = sum(result.x * df['Protein (g/100g)'])
-    total_fat = sum(result.x * df['Fat (g/100g)'])
-    total_sugar = sum(result.x * df['Sugar (g/100g)'])
-    print(f"Protein: {total_protein:.2f} g")
-    print(f"Fat: {total_fat:.2f} g")
-    print(f"Sugar: {total_sugar:.2f} g")
-else:
-    print("No solution found.")
+    print("No optimal solution found with given constraints.")
