@@ -12,10 +12,6 @@ nutrient_columns = df.select_dtypes(include=[np.number]).columns.tolist()
 non_nutrient_cols = ['Main category', 'Subcategory', 'Detailed category']  # adjust as needed
 nutrient_columns = [col for col in nutrient_columns if col not in non_nutrient_cols]
 
-print("Zinc range: ", df["Zinc (mg/100g)"].min(), "-", df["Zinc (mg/100g)"].max())
-print("Vitamin B12 range: ", df["Vitamin B12 (µg/100g)"].min(), "-", df["Vitamin B12 (µg/100g)"].max())
-
-
 print("Available nutrients:")
 for nut in nutrient_columns:
     print(f" - {nut}")
